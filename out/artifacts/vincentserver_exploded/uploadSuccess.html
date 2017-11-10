@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传成功</title>
+</head>
+<body>
+文件上传成功!<p>将在 <span id="mes">2</span> 秒钟后返回首页！</p>
+</body>
+<script type="text/javascript">
+//    window.setTimeout("window.location='index.html'",2000);
+
+var i = 2;
+var intervalid;
+intervalid = setInterval("fun()", 1000);
+function fun() {
+    if (i == 0) {
+        window.location.href = "index.html";
+        clearInterval(intervalid);
+    }
+    document.getElementById("mes").innerHTML = i;
+    i--;
+}
+</script>
+
+
+</html>
