@@ -1,0 +1,129 @@
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--自适应屏幕宽度-->
+    <meta name="viewport" content="width=device-width,inital-scale=1,maximum-scale=1,user-scalable=no;" />
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <title>文件上传下载</title>
+    <style>
+        div{
+            margin:0 auto;
+            width: 300px;
+            height: auto;
+            background-color: crimson;
+            margin-top: 10%;
+            padding-top: 0.1px;
+            padding-bottom: 20px;
+        }
+
+        .table{
+            margin-left: -10%;
+            margin-right: 10%;
+        }
+
+    </style>
+</head>
+  <body onload="getFiles()">
+
+      <div>
+          <div style="width: auto;margin-left: 20%">
+              <form method="post" action="/UploadFile" enctype="multipart/form-data">
+                  上传:<input type="file" name="fileString" multiple class="file"/>
+                  <br/>
+                  <input type="submit" value="确定">
+              </form>
+Z
+              服务器所有文件:
+              <h5 style="color: orange ;margin-top: -2px">若要删除请双击！</h5>
+           <ul class="table"></ul>
+          </div>
+
+      </div>
+
+  </body>
+
+<script type="text/javascript">
+
+
+    function getFiles(){
+
+        $.ajax({
+            url: '/SearchFiles',
+            dataType: 'json',
+            method:'get',
+            success: function(data) {
+                var item;
+                var files = data['files'];
+                $.each(files, function(i, result) {
+                    item = "<li style='border-bottom:1px solid blue'><td>" + result + "</td></li>";
+                    $('.table').append(item);
+                });
+
+                //获取所有li的节点
+                var list = document.getElementsByTagName("li");
+                //给每个li绑定事件
+                for(var i = 0;i<list.length;i++){
+
+                    var timer = null;
+                    list[i].onclick = function(){
+                        clearTimeout(timer);
+                        var fileName = this.innerHTML;
+                        var localStyle = this.style;
+                        timer = setTimeout(function() { //在单击事件中添加一个setTimeout()函数，设置单击事件触发的时间间隔
+                            //弹出对应的li节点里面的内容
+                            var isDownload= confirm('是否下载'+fileName+'?');
+                            if(isDownload){   //文件下载
+                                localStyle.color = "brown";
+                                downloadFile(fileName);
+                            }
+                        }, 300);
+                    };
+                    list[i].ondblclick = function(){
+                        clearTimeout(timer);
+                        //弹出对应的li节点里面的内容
+                        var isDownload= confirm('是否删除'+this.innerHTML+'?');
+                        if(isDownload){   //文件下载
+                            this.style.color = "brown";
+                            deleteFile(this.innerHTML);
+                        }
+                    }
+                }
+
+
+            }
+
+        });
+
+    }
+
+    /**
+     * 下载文件
+     * @param innerHTML 文件名
+     */
+    function downloadFile(innerHTML) {
+        window.location.href="/DownloadFile?fileName="+innerHTML;
+    }
+
+    /**
+     * 删除文件
+     * @param innerHTML 文件名
+     */
+    function deleteFile(innerHTML){
+        $.ajax({
+            type: 'POST',
+            url: '/DeleteFile',
+            dataType: 'json',
+            data: {'fileName':innerHTML},
+            success: function(data){
+                var code= data['code'];
+                if(code == '0000'){
+                    window.location.href = '/index.html'
+                }
+            }
+        });
+    }
+
+</script>
+
+</html>
